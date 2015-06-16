@@ -70,7 +70,7 @@
 
 \title{\vspace{-5mm}NeuCoin: the First Secure, Cost-efficient\\ and Decentralized Cryptocurrency\\
   \vspace{8mm}
-  \large Version 1.0\\ March 25, 2015\vspace{3mm}}
+  \large Version 1.01\\ March 25, 2015\vspace{3mm}}
 
 \author{
   Kourosh Davarpanah\\
@@ -96,7 +96,7 @@ The NeuCoin Project hopes that this white paper will spark an honest, fact-based
  
 NeuCoin believes that its own proof-of-stake design fully solves the security and centralization problems with earlier proof-of-stake coins, as well as the mounting cost and increasing centralization problems faced by proof-of-work systems. As such, NeuCoin is the first peer-to-peer cryptocurrency, regardless of technology, that is secure, cost-efficient and decentralized in the long run.
 
-The NeuCoin Project is inviting all members of the cryptocurrency community to make comments, suggest edits, and point out potential flaws in the paper. NeuCoin bounties will be rewarded by the NeuCoin Code foundation for all constructive input, both positive and critical (click here for details).
+The NeuCoin Project is inviting all members of the cryptocurrency community to make comments, suggest edits, and point out potential flaws in the paper. NeuCoin bounties will be rewarded by the NeuCoin Code foundation for all constructive input, both positive and critical (click \href{http://www.neucoin.org/en/whitepaper/#bounty-program}{here} for details).
 
 Note that this paper does not discuss consensus algorithms based on trusted nodes (the systems used by Ripple and Stellar) because while that protocol has similar benefits to those of proof-of-stake, it requires users to trust third parties and beyond that, depends on “trustworthy” third parties to support the network by operating nodes, which may or may not happen over time.
 
@@ -106,7 +106,7 @@ Also not covered in this paper is the enormous side benefit derived from not hav
 
 \begin{abstract}
 % \noindent
-NeuCoin is a decentralized peer-to-peer cryptocurrency derived from Sunny King's Peercoin, which itself was derived from Satoshi Nakamoto's Bitcoin. As with Peercoin, proof-of-stake replaces proof-of-work as NeuCoin's security model, effectively replacing the operating costs of Bitcoin miners (electricity, computers) with the capital costs of holding the currency. Proof-of-stake also avoids proof-of-work's inherent tendency towards centralization resulting from competition for coinbase rewards among miners based on lowest cost electricity and hash power. 
+NeuCoin is a decentralized peer-to-peer cryptocurrency derived from Sunny King's Peercoin, which itself was derived from Satoshi Nakamoto's Bitcoin. As with Peercoin, proof-of-stake replaces proof-of-work as NeuCoin's consensus mechanism, effectively replacing the operating costs of Bitcoin miners (electricity, computers) with the capital costs of holding the currency. Proof-of-stake also avoids proof-of-work's inherent tendency towards centralization resulting from competition for coinbase rewards among miners based on lowest cost electricity and hash power. 
 
 NeuCoin increases security relative to Peercoin and other existing proof-of-stake currencies in numerous ways, including: (1) incentivizing nodes to continuously stake coins over time through substantially higher mining rewards and lower \textit{minimum stake age}; (2) abandoning the use of coin age in the mining formula; (3) causing the \textit{stake modifier} parameter to change over time for each stake; and (4) utilizing a client that punishes nodes that attempt to mine on multiple branches with duplicate stakes.
 
@@ -251,7 +251,7 @@ But does Bitcoin really enable extremely low-cost transactions? When one contemp
 running a hashing function that outputs a pseudo-random 256-digit number.}
 \end{figure}
 
-As discussed above, Bitcoin's network security is based on the total hash rate\footnote{The hash rate is a unit of measurement corresponding to the number of calculations per second a computer can perform. The hash rate of the Bitcoin network equals the combined hash rates of all computers mining Bitcoin.} of all the miners in the network. And the aggregate hash rate deployed by miners is strictly a function of financial payments made to miners. Hence, network security is directly determined by payments to miners. For security to stay high, payments to miners must stay high.
+As discussed above, Bitcoin's network security is based on the total hash rate\footnote{The hash rate is a unit of measurement corresponding to the number of calculations per second a computer can perform. The hash rate of the Bitcoin network equals the combined hash rates of all computers mining Bitcoin.} of all the miners in the network. And the aggregated hash rate deployed by miners is strictly a function of financial payments made to miners. Hence, network security is directly determined by payments to miners. For security to stay high, payments to miners must stay high.
 
 
 Miner payments are actually composed of two components: coinbase rewards (the new Bitcoin that is minted every block and rewarded to the miner who creates the block) and transaction fees. From Bitcoin's inception in January 2009 through November 2012, coinbase rewards equalled 50 Bitcoin per block. In November 2012, they were cut to 25 per block, which will continue until roughly July 2016, when they will be cut in half again to 12.5 per block. This halving continues every 4 years indefinitely, so that coinbase rewards will decline to 0.2 Bitcoin in 25 years and to practically zero in 50 years.
@@ -399,7 +399,7 @@ If all miners could be trusted to behave honestly, the above parameters would be
 \begin{enumerate}
 \item{First, miners could mine on multiple chains to avoid the chance of having their blocks \textit{orphaned}, which would undermine the ability of the network to reach consensus.}
 \item{Second, it would allow users to pre-compute future proofs-of-stake by calculating hashes using future \textit{timestamps}. This could encourage miners to only mine their stakes at the time they were likely to earn a \textit{\textit{coinstake}} reward, severely curtailing the mining participation rate over time. It could also allow miners to attack the network by colluding.}
-\item{Third and most problematically, users could gain advantage over other miners by using computational power to ``grind'' through \textit{\textit{kernels}} to identify virtual \textit{UTXOs} that would mine very quickly or at some specific time in the future. If it were profitable to gain advantage using computational power, then the system would degrade into a proof-of-work situation, with all of its shortcomings.}
+\item{Third and most problematic, users could gain advantage over other miners by using computational power to ``grind'' through \textit{\textit{kernels}} to identify virtual \textit{UTXOs} that would mine very quickly or at some specific time in the future. If it were profitable to gain advantage using computational power, then the system would degrade into a proof-of-work situation, with all of its shortcomings.}
 \end{enumerate}
 
 To correct the first issue, Peercoin built a feature into its client called the \textit{duplicate stake detection mechanism} that detects when miners attempt to mine on multiple chains and rejects their blocks mined with duplicate stakes.\footnote{Proof-of-stake critics raise the concern that there could be a “tragedy of the commons” caused by large numbers of selfish miners colluding and altering their clients to both transmit and accept duplicate stakes, preventing the network from reaching consensus. The NeuCoin team does not share this concern. This sort of selfish behavior could only yield negligible gains but would destroy the currency if it became widespread. Regardless, NeuCoin's modification to Peercoin's client completely addresses the concern of nodes mining on multiple chains by penalizing those that attempt to do so. See section~\ref{32} for further discussion.}
@@ -695,7 +695,7 @@ His upside was simply to defraud a merchant of X NeuCoins (not the large amount 
 To model the double spend attack mathematically\cite{nakamoto2008bitcoin}, we consider an attacker with a portion p of the mining coins trying to attack a merchant who waits n confirmations. The probability to succeed is:
 
  
-$$ P[\text{\textit{double spend}}]= 1 - \sum\limits_{i=0}^n\frac{\lambda^{i}e^{n-i}}{k!} \Big[ 1- \big(\frac{p}{q}\big)^{n-i} \Big] $$
+$$ P[\text{\textit{double spend}}]= 1 - \sum\limits_{i=0}^n\frac{\lambda^{i}e^{-n\frac{p}{q}}}{i!} \Big[ 1- \big(\frac{p}{q}\big)^{n-i} \Big] $$
 with $p$ the portion of mining coins owned by the attacker, $q=1-p$ the portion of mining coins of the rest of the network, $\lambda=n\frac{p}{q}$ the expected number of blocks generated by the attacker (modeled as a Poisson process) assuming the rest of the network took the average expected time per block to create $n$ blocks.
 
 \vspace{2mm}
@@ -740,7 +740,7 @@ Consider an attacker planning a double spend attack on a merchant who waits for 
 \item{Scenario C: he splits his stake into 1,000,000 \textit{UTXOs}.}
 \end{itemize}
 
-In all scenarios, his chances of generating his first block in a given timestamp is the same. This may seem counter-intuitive. It would seem that his chances of generating a block with 10,000 \textit{UTXOs} would be higher than it would be with 100 \textit{UTXOs}. However, one must recall that the chances of mining a block are directionally proportional to the size of the stake. So in scenario A each of the 100 \textit{UTXOs} have a 100x greater chance of creating a block than the 10,000 \textit{UTXOs} in scenario B.
+In all scenarios, his chances of generating his first block in a given timestamp are the same. This may seem counter-intuitive. It would seem that his chances of generating a block with 10,000 \textit{UTXOs} would be higher than it would be with 100 \textit{UTXOs}. However, one must recall that the chances of mining a block are directionally proportional to the size of the stake. So in scenario A each of the 100 \textit{UTXOs} have a 100x greater chance of creating a block than the 10,000 \textit{UTXOs} in scenario B.
 
 Now consider what the scenarios would look like after the attacker has created 20 blocks:
 Scenario A: attacker has 80 \textit{UTXOs} left with which he is trying to generate 40 more blocks. Note that he has 80\% of his original stake available to mine.
@@ -868,7 +868,7 @@ With 20\% of all staked coins, the attacker will on average find 40 blocks withi
 \caption{Probability mass function for an attacker with 20\% of the mining coins over a 200 minutes time interval.}
 \end{figure}
 
-In this particular case, the probability for a given \textit{stake modifier} to create 160 \textit{kernels} that will mine is $\sim10-{46}$. 
+In this particular case, the probability for a given \textit{stake modifier} to create 160 \textit{kernels} that will mine is $\sim10^{-46}$. 
 
 As will be shown below, given NeuCoin's choice of \textit{modifier interval}, a grinding attack would require an attacker to own approximately 30\% of the total supply of staked currency (assuming he had access to thousands of ASICs' worth of hash power).
 
