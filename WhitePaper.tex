@@ -70,7 +70,7 @@
 
 \title{\vspace{-5mm}NeuCoin: the First Secure, Cost-efficient\\ and Decentralized Cryptocurrency\\
   \vspace{8mm}
-  \large Version 1.01\\ March 25, 2015\vspace{3mm}}
+  \large Version 1.1\\ March 25, 2015\vspace{3mm}}
 
 \author{
   Kourosh Davarpanah\\
@@ -651,7 +651,7 @@ The widely and casually held view in the proof-of-work community - that it is ``
 A more serious critique concerns the possibility of rewriting transaction history using ``old private keys'' (technically, using stakes that are no longer unspent at present time, or in layman's terms: using coins that are no longer owned). Moreover, the old stakes could have been owned by a third party (who since sold them). The disconcerting upshot is that an attacker never needs to own the currency at all (so it really is ``costless''). This section will show that when creating a fork at an earlier point in transaction history with old private keys, the attacker will be starting the attack too many blocks behind to ever be able to catch up.  }
 \item{\textbf{Grinding attack}
 
-The grinding attack - where the attacker uses computational power to grind through \textit{kernels} in hopes of discovering ones that enables him to outperform the main chain - is the most serious threat to proof-of-stake coins. This paper has already discussed how Peercoin attempts to defeat this threat through the \textit{stake modifier} and also discussed the changes that NeuCoin made to Peercoin's \textit{stake modifier} parameters. The upcoming section on the grinding attack will show how NeuCoin's design makes grinding cost-prohibitive, requiring the grinding attacker to acquire a minimum of 30\% of the staked currency in order to be successful (versus requiring 51\% of the staked currency without grinding).\footnote{NeuCoin is currently researching several possible design changes that would require a grinding attacker to acquire the same minimum 51\% stake in the currency that is necessary to carry out any other attack.} }
+The grinding attack - where the attacker uses computational power to grind through \textit{kernels} in hopes of discovering ones that enables him to outperform the main chain - is the most serious threat to proof-of-stake coins. This paper has already discussed how Peercoin attempts to defeat this threat through the \textit{stake modifier} and also discussed the changes that NeuCoin made to Peercoin's \textit{stake modifier} parameters. The upcoming section on the grinding attack will show how NeuCoin's design makes grinding cost-prohibitive, requiring the grinding attacker to acquire a minimum of 30\% of the staked currency in order to be successful (versus requiring 51\% of the staked currency without grinding). }
 \item{\textbf{Preprogrammed long-range attack}
 
 This attack involves putting together a collection of stakes that will perform very well in a specific time window in the future (for instance a year or more). This is a very potent theoretical attack against Peercoin that stems from the fact that the \textit{stake modifier} of a given stake is static. NeuCoin's changes to the \textit{stake modifier} parameters completely neutralize this attack vector.}
@@ -689,7 +689,7 @@ A double spend attack on a proof-of-stake coin consists of the following steps, 
   
 Given that this would-be attacker in the example above had to start his attack by purchasing 10\% of the total currency supply in order to have these infinitesimal chances of success, it is obvious that this attack will never happen in the real world. It should also be pointed out that it's not as though the attacker had the chance to earn a huge reward. 
 
-His upside was simply to defraud a merchant of X NeuCoins (not the large amount Y used for the attack). And if the attacker were attempting to defraud the merchant of a large dollar value (say \$10,000 or more), the merchant would have waited for far more than one hours' worth of confirmations.
+His upside was simply to defraud a merchant of X NeuCoins (not the large amount Y used for the attack). And if the attacker were attempting to defraud the merchant of a large dollar value (say \$10,000 or more), the merchant would have waited for far more than one hours' worth of confirmations. Following our example above, if the merchant waited for two hours (120 confirmations) rather than one, the attacker's odds of success would decrease from $\sim10^{-35}$ all the way to $\sim10^{-69}$.
 
 
 To model the double spend attack mathematically\cite{nakamoto2008bitcoin}, we consider an attacker with a portion p of the mining coins trying to attack a merchant who waits n confirmations. The probability to succeed is:
@@ -723,7 +723,36 @@ with $p$ the portion of mining coins owned by the attacker, $q=1-p$ the portion 
 
 \subsubsection*{Role of \textit{minimum stake age} in attempts to revise transaction history}
 
-Technically speaking, an attacker cannot conduct a double spend attack with a single stake because the \textit{minimum stake age} prevents a stake from mining for 1.6 days after it has generated a block. Therefore, the attacker must split his stake into:
+Some critics have the impression that an attacker could beat the odds presented above by sending his coins back to himself again and again until he finds parameters that enable him to mine more blocks than the main chain. These critics are neglecting to consider the \textit{minimum stake age}.
+
+NeuCoin's \textit{minimum stake age} of 1.6 days requires that a given stake must remain idle for 1.6 days before it’s allowed to mine\footnote{In practice, this means that a proof using a timestamp within the \textit{minimum stake age} period would produce an invalid block which would be rejected by the network}. This foils an attacker who tries to repeatedly send his stake back to himself searching for parameters that enable him to mine more blocks than the main chain. 
+
+The analysis above demonstrated that the odds of success decrease exponentially the larger the number of blocks that the attacker must create relative to the main chain. (For example, an attacker using 10\% of the staked currency has a $\sim10^{-6}$ chance of building 10 blocks faster than the rest of the network builds 10 blocks, but only $\sim10^{-69}$ chance of building 120 blocks faster than the rest of the network builds 120 blocks).
+
+Due to the \textit{minimum stake age} , an attacker who hopes to send his coins to himself repeatedly looking for an advantage by definition starts his attack with 1.6 days disadvantage (in average 2,304 blocks) compared to the main chain. 
+To illustrate the effect of \textit{minimum stake age} , let’s consider an attacker with 10\% of the staked currency. Such an attacker would have a $\sim10^{-35}$ chance of mining 60 blocks faster than the main chain on his first attempt, prior to re-sending his stake back to himself. 
+On subsequent attempts however, the attacker cannot create any blocks during the first 1.6 days. Therefore, when the attacker's stake finally starts generating blocks, the rest of the network has in average generated $ 1.6 \times 24 \times 60 \times (100\%-10\%)\sim 2073 \text{ blocks} $. Therefore, the attacker must catch up with the main chain despite this initial lag. His chances to succeed are less than $\sim10^{-500}$. \footnote{
+	We model this mathematically by considering an attacker attempting to reorganize the transaction history by repeatedly trying to fork the main chain and controlling a portion $p$ of the mining coins at the beginning of the fork.
+
+	The arrival of the blocks on the fork is modelled as a Poisson process. At time t after the beginning of the attack, the expected number of blocks the attacker will have created is:
+	\begin{itemize}
+	\item{$\frac{p t}{\tau}$ for the first fork.}
+	\item{$\frac{p (t-T_{MSA})}{\tau}$ if $t\leq T_{MSA}$ (with $\tau$ the \textit{block time} and $T_{MSA}$ the \textit{minimum stake age}) for all subsequent forks.}
+	\end{itemize}
+
+	During the same time period, miners working on the main chain will have generated, on average, $(1-p)\frac{t}{\tau}$ blocks. Therefore, the probability that the attacker's fork is longer than the main chain at time $t$ is:
+
+	For the initial fork: $$P\Big[ Poiss\big(p\frac{t}{\tau}\big)\geq (1-p) \frac{t}{\tau} \Big]=\Gamma\Big((1-p) \frac{t}{\tau},p\frac{t}{\tau} \Big)$$
+
+	For the subsequent forks: $$P\Big[ Poiss\big(p\frac{max(t-T_{MSA},0)}{\tau}\big)\geq (1-p) \frac{t}{\tau} \Big]=\Gamma\Big((1-p) \frac{t}{\tau},p\frac{max(t-T_{MSA},0)}{\tau} \Big)$$
+	where $\Gamma$ is the regularized incomplete gamma function, $\tau$ is the average \textit{block time} and $T_{MSA}$ is the \textit{minimum stake age}.
+
+}
+
+So this simplistic version of ``grinding'' through stakes by re-sending them to oneself is defeated by the \textit{minimum stake age} . The more sophisticated version of grinding not through stakes but through stake modifiers is discussed in section~\ref{333}.
+
+
+Besides defeating simple grinding attacks, the \textit{minimum stake age} also has the side effect of requiring an attacker attempting a double spend to split his stake into a very large number of very small stakes. As reviewed above, the \textit{minimum stake age} prevents a stake from mining for 1.6 days after it has generated a block. Therefore, the attacker must split his stake into:
 \begin{itemize}
 \setlength{\itemsep}{0pt}
 \item{at least the number of confirmations used by the merchant plus one.}
@@ -731,7 +760,6 @@ Technically speaking, an attacker cannot conduct a double spend attack with a si
 \end{itemize}
 
 
-\newpage
 Consider an attacker planning a double spend attack on a merchant who waits for 60 confirmations. Now consider three scenarios:
 \begin{itemize}
 \setlength{\itemsep}{0pt}
@@ -750,51 +778,108 @@ Scenario C: attacker has 9,999,980 \textit{UTXOs} left with which he is trying t
 
 Since the probability of success decreases with the attacker's stakes that cannot mine, it is clear that the attacker will want to split his stake into a very large number of smaller stakes in order to increase his chances. That said, we can see from our example that the gains from splitting into smaller and smaller stakes quickly diminish - improving from the use of 80\% of the original stake to 99.8\% is much more important than the further improvement to 99.9998\%.
 
+
+
 \subsubsection{History revision using old private keys}
 \label{332}
 
-In the previous section on double spends, it was shown that even in the case where an attacker owned a significant portion of all staked coins, he still faced infinitesimal odds of success. But proof-of-stake critics have pointed out that attackers could actually attempt to rewrite transaction history without owning any of the currency. All they would need to do is acquire “old private keys.” In other words, they could use old stakes that were previously owned by third parties who had since sold them.
+In the previous section on double spends, it was shown that even in the case where an attacker owned a significant portion of all staked coins, he still faced infinitesimal odds of success. But proof-of-stake critics have pointed out that attackers could actually attempt to rewrite transaction without owning any of the currency. All they would need to do is acquire ``old private keys''. In other words, they could use old stakes that were previously owned by third parties who had since sold them. 
 
-The history revision attack is in essence similar to  the double spend attack. In both cases, the attacker creates a fork and attempts to extend it so that it becomes longer than the main chain.
+The history revision with private keys attack is in essence similar to the double spend attack. In both cases, the attacker creates a fork and attempts to extend it so that it becomes longer than the main chain.
 
-However, in a double spend attack, the attacker starts his fork with no lag. When trying to rewrite history with old private keys, the attacker necessarily has to start the attack with a long lag, specifically, at the time in the past when the old private keys controlled \textit{UTXOs}. Hence, the attacker must not simply generate $X+1$ blocks in the time it takes the rest of the network to generate X blocks, as in a double spend attack. The history revision attacker must generate $X+1+Y$ blocks, where Y is the number of blocks represented by the attacker's lag behind the main chain. In addition, in double spend attacks where the attacker is using a stake that he actually owns (say 20\% of all staked coins), the rest of the network with which he competes owns the remaining 80\%. However, when using old private keys to 20\% of the staked coins, the attacker is competing against not 80\% of the staked coins but against 100\% of them, because the attacker's old coins are now owned by new parties who mine on the main chain.
+However, in a double spend attack, the attacker attempted to rewrite history over a relatively small number of blocks, corresponding to the number of confirmations required by the merchant. When trying to rewrite history with old private keys, the attacker necessarily has to start his fork far behind because of the time it takes to obtain keys giving control over a significant portion of coins in the past. In addition, in double spend attacks where the attacker is using a stake that he actually owns (say 20\% of all staked coins), the rest of the network with which he competes owns the remaining 80\%. However, when using old private keys to 20\% of the staked coins, the attacker is competing against not 80\% of the staked coins but against 100\% of them, because the attacker's old coins are now owned by new parties who mine on the main chain.
 
-So while it is theoretically possible for an attacker to obtain access (private keys) to another person's old stake that they have already spent or sold, the downside is that the number of blocks that the attacker needs to build on his branch is daunting. Obviously, the further back in time that the attacker would begin his side branch, the closer to impossible his task becomes.
+Clearly, attempting to rewrite history over a long range makes things much harder. For example, an attacker controlling private keys over 60\% of the coins 2 days in the past would have $\sim10^{-141}$ chance of ever catching up with the network.
+To be able to rewrite history over a significant period of time (a few days or more), the attacker actually needs to own old private keys giving control over more coins than are currently staking on the main chain.
 
-Let's consider an example and make assumptions that would give the attacker his best possible chances. Rather than going back a long time, let's just go back one hour. This is the shortest time that the attacker's accomplice (the one who gave the attacker access to the private keys to his own stake) could have possibly sold off his coins assuming that the counterparty or merchant waited for one hour's worth of confirmations.
+For our mathematical model, let’s consider an attacker owning old private keys giving him control over a portion $p$ of the mining coins at a given point t minutes in the past where he starts his fork.
 
-Now let's make the assumption that the attacker's accomplice actually owned 10\% of the entire supply of the currency that was being staked. This assumption is totally unrealistic because the merchant who acquired this gigantic quantity of coins from the accomplice would have waited for far more than one hour's worth of confirmations. 
+We model the arrival of the blocks on the attacker's fork as a Poisson process. The expected number of blocks the attacker will be able to create from the start of the block to present time is $\frac{p t}{\tau}$.
 
-Note that these are same numbers - 10\% of the staked currency supply and 60 blocks - as in the double spend attack from the previous section. But in this attack, during the time that the attacker is generating those 60 blocks to catch up to the main chain (``revising history''), the main chain is marching forward in time generating its own blocks, which the attacker must also match and finally surpass. While in the double spend example the attacker had a one in $10^{35}$ chance of succeeding, in this history revision attack using the same 10\% of staked coins, the odds have been cut to one in $\sim10^{95}$. Clearly, going back in time to start an attack makes things \textbf{much} harder.
- 
-Now let's consider a scenario where the attacker gains control of old private keys for not 10\% but rather 75\% of the currency's staked coins. But we will require the attacker to start his branch four hours (rather than just one) behind the main chain. In this case, despite having access to so much old currency, the attacker's odds of ever catching up to the main chain are still less than $\sim10^{-57}$. It may seem surprising that an attacker would not be able to catch up to the main chain with anything greater than 50\% of the staked currency. However, in the case of using old private keys, the attacker with 75\% is not competing against the network with the remaining 25\% of the coins but rather against the network with 100\% (because the old private keys have new owners mining on the main chain).
+During the same period, miners working on the main chain will have generated, on average,$\frac{t}{\tau}$ blocks. Therefore, the probability that the attacker's fork is longer than the main chain at time $t$ after the beginning of the fork is:
 
- 
-For our mathematical model, let's consider an attacker wishing to perform an $n$-deep reorganization and controlling a portion p of the coins taking part in the mining process at height $h_{max}-n$.
+$$P\Big[ Poiss\big(p\frac{t}{\tau}\big)\geq  \frac{t}{\tau} \Big]=\Gamma\Big(\frac{t}{\tau},p\frac{t}{\tau} \Big)$$
+where $\Gamma$ is the regularized incomplete gamma function and $\tau$ is the average \textit{block time}.
 
-We can model the arrival of the blocks on the competing chain as a Poisson process. At time $t$ after the beginning of the attack, the expected number of blocks the attacker will have created is $p \frac{t}{\tau}$, while in average the number of blocks on the main chain (starting at the fork) will be $\frac{t}{\tau}+n$. Therefore, the probability that the attacker's branch is longer than the main chain at time $t$ after the beginning of the attack is:
-$$P\big[ Poiss(p\frac{t}{\tau})\geq \alpha \frac{t}{\tau} +n\big]=\Gamma\big(\alpha \frac{t}{\tau} +n,p\frac{t}{\tau}\big)$$
-where $\Gamma$ is the regularized incomplete gamma function, $\tau$ is the average \textit{block time} and $\alpha=1-p$ if the attacker still owns the coins used in the reorganisation attempt and $1$ otherwise.
-\newpage
-The following, very basic, upper bound of the cumulative probability is sufficient to show that the probability of an attacker ever catching up with the network is infinitesimal:
-$$P[Success]\leq \sum\limits_{i=1}^\infty \Gamma\big(\alpha i+n,pi)$$ 
-
-The following graph highlights the fact that the probability to catch up with the main chain decreases exponentially with how far behind the attacker starts:
-\begin{figure}[H]
-\centering
-\includegraphics[width=96mm,height=63mm]{05_upperbound_notowning.png}
-\caption{Upper bound for the probability of catching up starting $n$ blocks behind for an attacker controlling different portions $p$ of old private keys.}
-\end{figure}
-
-The history revision attack can also be conducted with coins that the attacker still owns. In this case, the rate at which the main chain generates blocks depends on the portion of coins the attacker owns. The graph below shows that for the attacker to be successful, the attacker must own $>50\%$ of the mining coins, i.e. $>50\%$ of the mining power, like in a $51\%$ attack on Bitcoin. 
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=96mm,height=63mm]{05bis_upperbound_owning.png}
-\caption{Upper bound for the probability of catching up starting $n$ blocks behind for an attacker owning different portions $p$ of the total staked coins.}
+\includegraphics[width=96mm,height=63mm]{05_oldprivates.png}
+\caption{Probability to catch up with the main chain starting $d$ days in the past for an attacker controlling different portions $p$ of old private keys.}
 \end{figure}
 
-Therefore, the only way for an attacker to revise history with less than 50\% of the staked coins is to find a way to maliciously increase the mining power of his stake so that he consistently generates more blocks than the rest of the network combined. The next section describes an attack vector in which an attacker tries to gain such an advantage.
+\subsubsection*{Preventing very long-range attacks using old private keys}
+
+As stated previously, can represent a threat if an attack is able to get his hands over almost all the private keys at a given point in the past.
+Since the percentage of coins mining is expected to decrease with time, an attacker with old private keys giving him control over 90\% of the old private keys a few years in the past for example will be able to rewrite the entire history over the last three years.
+
+An simple and elegant way to neutralize this attack vector is to forbid nodes from reverting more than a certain number of blocks.
+If we suppose that it would take at least a few months for an attacker to gather enough old private keys to carry such an attack, nodes could reject any reorganization deeper than say 1-month worth of blocks (43830 blocks).
+
+Such a proof-of-stake implementation is completely secure to all types of attacks and fully decentralized (it doesn’t require any kind of centrally broadcasted checkpoints).
+However, such an implementation differs from Bitcoin in that when setting up a new node, being aware of the protocol (i.e. ``longest'' chain is valid) and the set of all blocks that have been published is not enough to be able to determine which chain is the one currently accepted by the entire network. Such a node must also be aware of which chain was valid say a month in the past (this idea has been explored by Vitalik Buterin\cite{weaksubjectivity}).
+
+Therefore, such an implementation does not allow ``trustless bootstrapping'' but once a trusted source has provided a newly entering node with the necessary information, the network functions in a fully decentralized manner.
+
+The necessary additional information (which chain was considered valid N blocks ago) can be provided by an wide range of entities (friends, NPOs, corporations…). What is critical is that such an entity cannot gain anything from providing erroneous information.
+
+% In the previous section on double spends, it was shown that even in the case where an attacker owned a significant portion of all staked coins, he still faced infinitesimal odds of success. But proof-of-stake critics have pointed out that attackers could actually attempt to rewrite transaction history without owning any of the currency. All they would need to do is acquire “old private keys.” In other words, they could use old stakes that were previously owned by third parties who had since sold them.
+
+% The history revision attack is in essence similar to  the double spend attack. In both cases, the attacker creates a fork and attempts to extend it so that it becomes longer than the main chain.
+
+% However, in a double spend attack, the attacker starts his fork with no lag. When trying to rewrite history with old private keys, the attacker necessarily has to start the attack with a long lag, specifically, at the time in the past when the old private keys controlled \textit{UTXOs}. Hence, the attacker must not simply generate $X+1$ blocks in the time it takes the rest of the network to generate X blocks, as in a double spend attack. The history revision attacker must generate $X+1+Y$ blocks, where Y is the number of blocks represented by the attacker's lag behind the main chain. In addition, in double spend attacks where the attacker is using a stake that he actually owns (say 20\% of all staked coins), the rest of the network with which he competes owns the remaining 80\%. However, when using old private keys to 20\% of the staked coins, the attacker is competing against not 80\% of the staked coins but against 100\% of them, because the attacker's old coins are now owned by new parties who mine on the main chain.
+
+% So while it is theoretically possible for an attacker to obtain access (private keys) to another person's old stake that they have already spent or sold, the downside is that the number of blocks that the attacker needs to build on his branch is daunting. Obviously, the further back in time that the attacker would begin his side branch, the closer to impossible his task becomes.
+
+% Let's consider an example and make assumptions that would give the attacker his best possible chances. Rather than going back a long time, let's just go back one hour. This is the shortest time that the attacker's accomplice (the one who gave the attacker access to the private keys to his own stake) could have possibly sold off his coins assuming that the counterparty or merchant waited for one hour's worth of confirmations.
+
+% Now let's make the assumption that the attacker's accomplice actually owned 10\% of the entire supply of the currency that was being staked. This assumption is totally unrealistic because the merchant who acquired this gigantic quantity of coins from the accomplice would have waited for far more than one hour's worth of confirmations. 
+
+% Note that these are same numbers - 10\% of the staked currency supply and 60 blocks - as in the double spend attack from the previous section. But in this attack, during the time that the attacker is generating those 60 blocks to catch up to the main chain (``revising history''), the main chain is marching forward in time generating its own blocks, which the attacker must also match and finally surpass. While in the double spend example the attacker had a one in $10^{35}$ chance of succeeding, in this history revision attack using the same 10\% of staked coins, the odds have been cut to one in $\sim10^{95}$. Clearly, going back in time to start an attack makes things \textbf{much} harder.
+ 
+% Now let's consider a scenario where the attacker gains control of old private keys for not 10\% but rather 75\% of the currency's staked coins. But we will require the attacker to start his branch four hours (rather than just one) behind the main chain. In this case, despite having access to so much old currency, the attacker's odds of ever catching up to the main chain are still less than $\sim10^{-57}$. It may seem surprising that an attacker would not be able to catch up to the main chain with anything greater than 50\% of the staked currency. However, in the case of using old private keys, the attacker with 75\% is not competing against the network with the remaining 25\% of the coins but rather against the network with 100\% (because the old private keys have new owners mining on the main chain).
+
+ 
+% For our mathematical model, let's consider an attacker wishing to perform an $n$-deep reorganization and controlling a portion p of the coins taking part in the mining process at height $h_{max}-n$.
+
+% We can model the arrival of the blocks on the competing chain as a Poisson process. At time $t$ after the beginning of the attack, the expected number of blocks the attacker will have created is $p \frac{t}{\tau}$, while in average the number of blocks on the main chain (starting at the fork) will be $\frac{t}{\tau}+n$. Therefore, the probability that the attacker's branch is longer than the main chain at time $t$ after the beginning of the attack is:
+% $$P\big[ Poiss(p\frac{t}{\tau})\geq \alpha \frac{t}{\tau} +n\big]=\Gamma\big(\alpha \frac{t}{\tau} +n,p\frac{t}{\tau}\big)$$
+% where $\Gamma$ is the regularized incomplete gamma function, $\tau$ is the average \textit{block time} and $\alpha=1-p$ if the attacker still owns the coins used in the reorganisation attempt and $1$ otherwise.
+% \newpage
+% The following, very basic, upper bound of the cumulative probability is sufficient to show that the probability of an attacker ever catching up with the network is infinitesimal:
+% $$P[Success]\leq \sum\limits_{i=1}^\infty \Gamma\big(\alpha i+n,pi)$$ 
+
+% The following graph highlights the fact that the probability to catch up with the main chain decreases exponentially with how far behind the attacker starts:
+% \begin{figure}[H]
+% \centering
+% \includegraphics[width=96mm,height=63mm]{05_upperbound_notowning.png}
+% \caption{Upper bound for the probability of catching up starting $n$ blocks behind for an attacker controlling different portions $p$ of old private keys.}
+% \end{figure}
+
+% The history revision attack can also be conducted with coins that the attacker still owns. In this case, the rate at which the main chain generates blocks depends on the portion of coins the attacker owns. The graph below shows that for the attacker to be successful, the attacker must own $>50\%$ of the mining coins, i.e. $>50\%$ of the mining power, like in a $51\%$ attack on Bitcoin. 
+
+% \begin{figure}[H]
+% \centering
+% \includegraphics[width=96mm,height=63mm]{05bis_upperbound_owning.png}
+% \caption{Upper bound for the probability of catching up starting $n$ blocks behind for an attacker owning different portions $p$ of the total staked coins.}
+% \end{figure}
+
+% Therefore, the only way for an attacker to revise history with less than 50\% of the staked coins is to find a way to maliciously increase the mining power of his stake so that he consistently generates more blocks than the rest of the network combined. The next section describes an attack vector in which an attacker tries to gain such an advantage.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 \subsubsection{Grinding attack}
 \label{333}
